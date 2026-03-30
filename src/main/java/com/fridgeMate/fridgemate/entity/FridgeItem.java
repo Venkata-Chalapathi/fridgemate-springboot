@@ -1,20 +1,26 @@
-package com.fridgeMate.fridgemate.Entity;
+package com.fridgeMate.fridgemate.entity;
+
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.LocalDate;
 
-public class FridgeItem {
 
-    private Long id;
+@Document(collection = "fridgeItem_entries")
+public class FridgeItem {
+    @Id
+    private String id;
+
     private String name;
     private String category;
     private int quantity;
     private LocalDate expiryDate;
 
-    public Long getId() {
+    public String getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(String id) {
         this.id = id;
     }
 

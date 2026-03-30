@@ -7,6 +7,8 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 public class FridgemateApplication {
 
 	public static void main(String[] args) {
+
+
 		SpringApplication.run(FridgemateApplication.class, args);
 	}
 
