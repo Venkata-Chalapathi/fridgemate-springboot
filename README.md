@@ -1,12 +1,13 @@
 # FridgeMate - Smart Fridge & Pantry Tracker
 
-A Spring Boot REST API to track fridge items and get expiry alerts.
+A Spring Boot REST API to track fridge items and prevent food waste by monitoring expiry dates.
 
 ## Tech Stack
 - Java 21
 - Spring Boot 4.0.5
 - MongoDB
 - Spring Data MongoDB
+- Lombok
 - Maven
 
 ## Features
@@ -15,7 +16,7 @@ A Spring Boot REST API to track fridge items and get expiry alerts.
 - Get item by ID
 - Update item details
 - Delete item
-- Track expiry dates
+- Track expiry dates with LocalDate
 
 ## API Endpoints
 
@@ -23,11 +24,11 @@ A Spring Boot REST API to track fridge items and get expiry alerts.
 |--------|-----|-------------|
 | GET | /fridge | Get all items |
 | POST | /fridge | Add new item |
-| GET | /fridge/{id} | Get item by ID |
-| PUT | /fridge/{id} | Update item |
-| DELETE | /fridge/{id} | Delete item |
+| GET | /fridge/id/{id} | Get item by ID |
+| PUT | /fridge/id/{id} | Update item |
+| DELETE | /fridge/id/{id} | Delete item |
 
-## Sample Request
+## Sample Request Body
 ```json
 {
     "name": "Milk",
@@ -53,6 +54,7 @@ src/main/java/com/fridgeMate/fridgemate/
 
 ## Coming Soon
 - Spring Security + JWT authentication
+- User login per household
 - Expiry date alerts
-- React frontend
+- React frontend dashboard
 - MySQL migration
