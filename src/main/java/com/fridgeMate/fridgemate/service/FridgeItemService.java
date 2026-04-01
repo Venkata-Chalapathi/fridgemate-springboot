@@ -1,6 +1,7 @@
 package com.fridgeMate.fridgemate.service;
 
 import com.fridgeMate.fridgemate.entity.FridgeItem;
+import com.fridgeMate.fridgemate.entity.User;
 import com.fridgeMate.fridgemate.repository.FridgeItemEntryRepository;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +16,16 @@ public class FridgeItemService {
     @Autowired
     private FridgeItemEntryRepository fridgeItemEntryRepository;
 
+    @Autowired
+    private UserService userService;
+
+    public void saveEntry(FridgeItem fridgeItem, String userName) {
+        User user = userService.findByUserName(userName);
+        FridgeItem saved = fridgeItemEntryRepository.save(fridgeItem);
+        user.getFridgeItems().add(saved);
+        userService.saveEntry(user);
+    }
+
     public void saveEntry(FridgeItem fridgeItem) {
         fridgeItemEntryRepository.save(fridgeItem);
     }
@@ -27,7 +38,10 @@ public class FridgeItemService {
         return fridgeItemEntryRepository.findById(id);
     }
 
-    public void deleteById(ObjectId id){
+    public void deleteById(ObjectId id, String userName){
+        User user = userService.findByUserName(userName);
+        user.getFridgeItems().removeIf(x -> x.getId().equals(id));
+        userService.saveEntry(user);
         fridgeItemEntryRepository.deleteById(id);
     }
 

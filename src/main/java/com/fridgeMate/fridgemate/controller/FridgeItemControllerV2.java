@@ -1,15 +1,15 @@
 package com.fridgeMate.fridgemate.controller;
 
 import com.fridgeMate.fridgemate.entity.FridgeItem;
+import com.fridgeMate.fridgemate.entity.User;
 import com.fridgeMate.fridgemate.service.FridgeItemService;
+import com.fridgeMate.fridgemate.service.UserService;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -20,10 +20,14 @@ public class FridgeItemControllerV2 {
     @Autowired
     private FridgeItemService fridgeItemService;
 
-    @GetMapping        // http://localhost:8080/journal
-    public ResponseEntity<?> getAll() {
+    @Autowired
+    private UserService userService;
+
+    @GetMapping("/{userName}")       // http://localhost:8080/journal
+    public ResponseEntity<?> getAll(@PathVariable String userName) {
         try {
-            List<FridgeItem> all = fridgeItemService.getAll();
+            User user = userService.findByUserName(userName);
+            List<FridgeItem> all = user.getFridgeItems();
 
             if(all != null && !all.isEmpty()){
                 return new ResponseEntity<>(all, HttpStatus.OK);
@@ -34,11 +38,10 @@ public class FridgeItemControllerV2 {
         return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 
-    @PostMapping
-    public ResponseEntity<?> createEntry(@RequestBody FridgeItem fridgeItem) {
+    @PostMapping("/{userName}")
+    public ResponseEntity<?> createEntry(@RequestBody FridgeItem fridgeItem, @PathVariable String userName) {
         try {
-//            fridgeItem.setExpiryDate(LocalDate.from(LocalDateTime.now()));
-            fridgeItemService.saveEntry(fridgeItem);
+            fridgeItemService.saveEntry(fridgeItem, userName);
             return new ResponseEntity<>(fridgeItem, HttpStatus.CREATED);
         } catch (Exception e){
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
@@ -48,6 +51,7 @@ public class FridgeItemControllerV2 {
     @GetMapping("id/{id}")
     public ResponseEntity<?> getFridgeItemById( @PathVariable ObjectId id ) {
         try {
+
             Optional<FridgeItem> fridgeItem = fridgeItemService.findById(id);
             if(fridgeItem.isPresent()){
                 return new ResponseEntity<>(fridgeItem.get(), HttpStatus.OK);
@@ -57,10 +61,10 @@ public class FridgeItemControllerV2 {
         }
         return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
-    @DeleteMapping("id/{id}")
-    public ResponseEntity<?> deleteFridgeItemById( @PathVariable ObjectId id ) {
+    @DeleteMapping("id/{userName}/{id}")
+    public ResponseEntity<?> deleteFridgeItemById( @PathVariable ObjectId id, @PathVariable String userName ) {
         try {
-            fridgeItemService.deleteById(id);
+            fridgeItemService.deleteById(id, userName);
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         } catch (Exception e) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
