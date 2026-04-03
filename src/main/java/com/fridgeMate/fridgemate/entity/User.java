@@ -27,5 +27,7 @@ public class User {
     @DBRef
     List<FridgeItem> fridgeItems = new ArrayList<>();
 
+    private List<String> roles;
+
 
 }

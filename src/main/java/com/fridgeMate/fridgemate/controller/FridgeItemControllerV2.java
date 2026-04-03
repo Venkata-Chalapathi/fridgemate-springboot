@@ -23,7 +23,7 @@ public class FridgeItemControllerV2 {
     @Autowired
     private UserService userService;
 
-    @GetMapping("/{userName}")       // http://localhost:8080/journal
+    @GetMapping("/{userName}")
     public ResponseEntity<?> getAll(@PathVariable String userName) {
         try {
             User user = userService.findByUserName(userName);
@@ -31,6 +31,9 @@ public class FridgeItemControllerV2 {
 
             if(all != null && !all.isEmpty()){
                 return new ResponseEntity<>(all, HttpStatus.OK);
+            }
+            if(all.isEmpty()){
+                return new ResponseEntity<>(HttpStatus.NO_CONTENT);
             }
         } catch (Exception ignored){
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
