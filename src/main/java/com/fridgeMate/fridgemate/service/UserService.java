@@ -25,9 +25,13 @@ public class UserService {
     private PasswordEncoder passwordEncoder;
 
 
-    public void saveEntry(User user) {
+    public void saveNewUser(User user) {
         user.setPassWord(passwordEncoder.encode(user.getPassWord()));
         user.setRoles(Arrays.asList("USER"));
+        userRepository.save(user);
+    }
+
+    public void saveUser(User user) {
         userRepository.save(user);
     }
 
@@ -47,4 +51,7 @@ public class UserService {
         return userRepository.findByUserName(userName);
     }
 
+//    public void deleteByUserName(String userName) {
+//        userRepository.deleteByUserName(userName);
+//    }
 }

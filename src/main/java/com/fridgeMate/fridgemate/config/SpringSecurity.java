@@ -30,8 +30,9 @@ public class SpringSecurity {
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(
                         auth -> auth
-                                .requestMatchers("/public/**").permitAll()
+//                                .requestMatchers("/public/**").permitAll()
                                 .requestMatchers("/fridge/**", "/user/**").authenticated()
+                                .requestMatchers("/admin/**").hasRole("ADMIN")
                                 .anyRequest().permitAll()
                 )
                 .httpBasic(Customizer.withDefaults());

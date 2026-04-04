@@ -33,7 +33,7 @@ public class UserController {
     @PostMapping
     public ResponseEntity<?> createUser(@RequestBody User user) {
         try {
-            userService.saveEntry(user);
+            userService.saveNewUser(user);
             return new ResponseEntity<>(user, HttpStatus.CREATED);
         } catch (Exception e) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
@@ -49,7 +49,7 @@ public class UserController {
     public ResponseEntity<?> deleteById(@PathVariable ObjectId id){
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String userName = authentication.getName();
-        userService.deleteByUserName(userName);
+        userRepository.deleteByUserName(userName);
         return new ResponseEntity<>( HttpStatus.NO_CONTENT );
     }
 
@@ -62,7 +62,7 @@ public class UserController {
 
         userInDb.setUserName(user.getUserName());
         userInDb.setPassWord(user.getPassWord());
-        userService.saveEntry(userInDb);
+        userService.saveNewUser(userInDb);
 
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }

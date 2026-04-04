@@ -8,10 +8,13 @@ import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/fridge")
@@ -23,9 +26,11 @@ public class FridgeItemControllerV2 {
     @Autowired
     private UserService userService;
 
-    @GetMapping("/{userName}")
-    public ResponseEntity<?> getAll(@PathVariable String userName) {
+    @GetMapping
+    public ResponseEntity<?> getAll() {
         try {
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            String userName = authentication.getName();
             User user = userService.findByUserName(userName);
             List<FridgeItem> all = user.getFridgeItems();
 
@@ -41,9 +46,11 @@ public class FridgeItemControllerV2 {
         return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 
-    @PostMapping("/{userName}")
-    public ResponseEntity<?> createEntry(@RequestBody FridgeItem fridgeItem, @PathVariable String userName) {
+    @PostMapping
+    public ResponseEntity<?> createEntry(@RequestBody FridgeItem fridgeItem) {
         try {
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            String userName = authentication.getName();
             fridgeItemService.saveEntry(fridgeItem, userName);
             return new ResponseEntity<>(fridgeItem, HttpStatus.CREATED);
         } catch (Exception e){
@@ -54,21 +61,32 @@ public class FridgeItemControllerV2 {
     @GetMapping("id/{id}")
     public ResponseEntity<?> getFridgeItemById( @PathVariable ObjectId id ) {
         try {
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            String userName = authentication.getName();
+            User user = userService.findByUserName(userName);
+            List<FridgeItem> collect = user.getFridgeItems().stream().filter(x -> x.getId().equals(id)).collect(Collectors.toList());
 
-            Optional<FridgeItem> fridgeItem = fridgeItemService.findById(id);
-            if(fridgeItem.isPresent()){
-                return new ResponseEntity<>(fridgeItem.get(), HttpStatus.OK);
+            if(!collect.isEmpty()){
+                Optional<FridgeItem> fridgeItem = fridgeItemService.findById(id);
+                if(fridgeItem.isPresent()){
+                    return new ResponseEntity<>(fridgeItem.get(), HttpStatus.OK);
+                }
             }
         } catch (Exception e){
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
         return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
-    @DeleteMapping("id/{userName}/{id}")
-    public ResponseEntity<?> deleteFridgeItemById( @PathVariable ObjectId id, @PathVariable String userName ) {
+    @DeleteMapping("id/{id}")
+    public ResponseEntity<?> deleteFridgeItemById( @PathVariable ObjectId id) {
         try {
-            fridgeItemService.deleteById(id, userName);
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            String userName = authentication.getName();
+            boolean removed = fridgeItemService.deleteById(id, userName);
+            if(removed){
+                return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+            }
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         } catch (Exception e) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
@@ -76,15 +94,23 @@ public class FridgeItemControllerV2 {
     @PutMapping("id/{id}")
     public ResponseEntity<?> updateFridgeItemById(@PathVariable ObjectId id, @RequestBody FridgeItem newItem){
         try {
-            FridgeItem oldItem = fridgeItemService.findById(id).orElse(null);
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            String userName = authentication.getName();
 
-            if(oldItem != null) {
-                oldItem.setName(newItem.getName() != null && !newItem.getName().equals("") ? newItem.getName() : oldItem.getName());
-                oldItem.setCategory(newItem.getCategory() != null && !newItem.getCategory().equals("") ? newItem.getCategory() : oldItem.getCategory());
-                oldItem.setQuantity(newItem.getQuantity() != 0 ? newItem.getQuantity() : oldItem.getQuantity());
-                oldItem.setExpiryDate(newItem.getExpiryDate() != null ? newItem.getExpiryDate() : oldItem.getExpiryDate());
-                fridgeItemService.saveEntry(oldItem);
-                return new ResponseEntity<>(oldItem, HttpStatus.OK);
+            User user = fridgeItemService.findByUserName(userName);
+            List<FridgeItem> collect = user.getFridgeItems().stream().filter(x -> x.getId().equals(id)).collect(Collectors.toList());
+
+            if(!collect.isEmpty()){
+                Optional<FridgeItem> fridgeItem = fridgeItemService.findById(id);
+                if(fridgeItem.isPresent()){
+                    FridgeItem oldItem = fridgeItem.get();
+                    oldItem.setName(newItem.getName() != null && !newItem.getName().equals("") ? newItem.getName() : oldItem.getName());
+                    oldItem.setCategory(newItem.getCategory() != null && !newItem.getCategory().equals("") ? newItem.getCategory() : oldItem.getCategory());
+                    oldItem.setQuantity(newItem.getQuantity() != 0 ? newItem.getQuantity() : oldItem.getQuantity());
+                    oldItem.setExpiryDate(newItem.getExpiryDate() != null ? newItem.getExpiryDate() : oldItem.getExpiryDate());
+                    fridgeItemService.saveEntry(oldItem);
+                    return new ResponseEntity<>(oldItem, HttpStatus.OK);
+                }
             }
         } catch (Exception e){
             return new ResponseEntity<>( HttpStatus.NOT_FOUND);
