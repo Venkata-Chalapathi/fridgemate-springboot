@@ -1,14 +1,3 @@
-
-
 spring:
-  data:
-    mongodb:
-      uri: mongodb+srv://chalapathivenkata40_db_user:gfoRH1LGVrdQyJig@cluster0.rrtq07k.mongodb.net/journaldb?appName=Cluster0
-      database: fridgeMatedb
-      auto-index-creation: true
-
-
-server:
-    port: 8080
-    servlet:
-      context-path: /
+  profiles:
+    active: prod

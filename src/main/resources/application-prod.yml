@@ -1,0 +1,5 @@
+spring:
+  data:
+    mongodb:
+      uri: mongodb+srv://chalapathivenkata40_db_user:gfoRH1LGVrdQyJig@cluster0.rrtq07k.mongodb.net/fridgeMatedb?appName=Cluster0
+      database: fridgeMatedb
